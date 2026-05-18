@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Management Tracker</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --color-text-primary: #1a1a1a;
+            --color-text-secondary: #666666;
+            --color-text-tertiary: #999999;
+            --color-background-primary: #ffffff;
+            --color-background-secondary: #f5f5f5;
+            --color-background-tertiary: #efefef;
+            --color-background-info: #e3f2fd;
+            --color-background-success: #e8f5e9;
+            --color-background-danger: #ffebee;
+            --color-border-primary: #e0e0e0;
+            --color-border-secondary: #d0d0d0;
+            --color-border-tertiary: #cccccc;
+            --color-text-info: #1565c0;
+            --color-text-success: #2e7d32;
+            --color-text-danger: #c62828;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--color-text-primary);
+            background: var(--color-background-secondary);
+            line-height: 1.6;
+        }
+
+        #root {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 20px;
+        }
+
+        h3 {
+            font-size: 14px;
+        }
+
+        button {
+            font-family: var(--font-sans);
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        input, textarea, select {
+            font-family: var(--font-sans);
+            border: 0.5px solid var(--color-border-tertiary);
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 13px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .card {
+            background: var(--color-background-primary);
+            border: 0.5px solid var(--color-border-tertiary);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 12px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .week-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            #root {
+                padding: 10px;
+            }
+        }
+
+        .time-block {
+            padding: 8px;
+            border-radius: 6px;
+            color: white;
+            font-size: 12px;
+            margin-bottom: 4px;
+            position: relative;
+        }
+
+        .time-block button {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(0,0,0,0.2);
+            color: white;
+            padding: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+            font-size: 10px;
+        }
+
+        .info-box {
+            background: var(--color-background-info);
+            color: var(--color-text-info);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 0.5px solid #90caf9;
+        }
+
+        .danger-box {
+            background: var(--color-background-danger);
+            color: var(--color-text-danger);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 0.5px solid #ef5350;
+        }
+
+        .success-box {
+            background: var(--color-background-success);
+            color: var(--color-text-success);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 0.5px solid #66bb6a;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--color-text-secondary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            justify-content: space-between;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--color-background-primary);
+            border: 0.5px solid var(--color-border-tertiary);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--color-background-tertiary);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const TimeTracker = () => {
+            const defaultCategories = [
+                { id: 'BR-corpdev', name: 'BR - Corpdev', color: '#534AB7', calendarType: 'work', priority: 'high', protected: true },
+                { id: 'BR-busdev', name: 'BR - Busdev', color: '#1D9E75', calendarType: 'work', priority: 'high', protected: true },
+                { id: 'BR-product', name: 'BR - Product', color: '#D85A30', calendarType: 'work', priority: 'medium', protected: false },
+                { id: 'BR-strategy', name: 'BR - Strategy', color: '#378ADD', calendarType: 'work', priority: 'medium', protected: false },
+                { id: 'BR-admin', name: 'BR - Admin', color: '#5F5E5A', calendarType: 'work', priority: 'low', protected: false },
+                { id: 'family-time', name: 'Family time', color: '#D4537E', calendarType: 'family', priority: 'high', protected: true },
+                { id: 'PEU-growth', name: 'PEU - Growth', color: '#639922', calendarType: 'family', priority: 'high', protected: true },
+                { id: 'PEU-walk', name: 'PEU - Walk', color: '#85B7EB', calendarType: 'family', priority: 'high', protected: true },
+                { id: 'PEU-fitness', name: 'PEU - Fitness', color: '#BA7517', calendarType: 'family', priority: 'medium', protected: false },
+                { id: 'PEU-social', name: 'PEU - Social', color: '#E24B4A', calendarType: 'family', priority: 'medium', protected: false },
+                { id: 'personal-admin', name: 'Personal admin', color: '#9E5D36', calendarType: 'family', priority: 'low', protected: false },
+                { id: 'ESCY', name: 'ESCY', color: '#0F6E56', calendarType: 'work', priority: 'medium', protected: false },
+                { id: 'flex-time', name: 'Flex time', color: '#B4B2A9', calendarType: 'work', priority: 'low', protected: false },
+            ];
+
+            function getWeekStart(date) {
+                const d = new Date(date);
+                const day = d.getDay();
+                const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+                return new Date(d.setDate(diff)).toISOString().split('T')[0];
+            }
+
+            const [data, setData] = React.useState(() => {
+                const saved = localStorage.getItem('timeTrackerData');
+                return saved ? JSON.parse(saved) : {
+                    categories: defaultCategories,
+                    timeBlocks: {},
+                    dailyReflections: {},
+                    weeklyReflections: {},
+                    tasks: [],
+                    currentWeek: getWeekStart(new Date()),
+                };
+            });
+
+            const [view, setView] = React.useState('daily');
+            const [selectedDay, setSelectedDay] = React.useState(null);
+
+            function saveData(newData) {
+                setData(newData);
+                localStorage.setItem('timeTrackerData', JSON.stringify(newData));
+            }
+
+            function getTodayDate() {
+                return new Date().toISOString().split('T')[0];
+            }
+
+            const today = getTodayDate();
+
+            // Helper functions
+            function addTimeBlock(dateStr, catId) {
+                const newBlocks = { ...data.timeBlocks };
+                if (!newBlocks[dateStr]) newBlocks[dateStr] = [];
+                newBlocks[dateStr].push({
+                    id: `${dateStr}-${Date.now()}`,
+                    categoryId: catId,
+                    duration: 45,
+                    title: '',
+                    startTime: '09:00',
+                    withOthers: false,
+                });
+                saveData({ ...data, timeBlocks: newBlocks });
+            }
+
+            function removeTimeBlock(dateStr, blockId) {
+                const newBlocks = { ...data.timeBlocks };
+                if (newBlocks[dateStr]) {
+                    newBlocks[dateStr] = newBlocks[dateStr].filter(b => b.id !== blockId);
+                }
+                saveData({ ...data, timeBlocks: newBlocks });
+            }
+
+            function addTask() {
+                const newTask = {
+                    id: Date.now().toString(),
+                    title: '',
+                    category: 'BR-admin',
+                    dueDate: today,
+                    completed: false,
+                };
+                saveData({ ...data, tasks: [...data.tasks, newTask] });
+            }
+
+            function updateTask(taskId, updates) {
+                saveData({
+                    ...data,
+                    tasks: data.tasks.map(t => t.id === taskId ? { ...t, ...updates } : t),
+                });
+            }
+
+            function removeTask(taskId) {
+                saveData({ ...data, tasks: data.tasks.filter(t => t.id !== taskId) });
+            }
+
+            function exportJSON() {
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `TimeTracker_${today}.json`;
+                a.click();
+            }
+
+            function saveDailyReflection(reflection) {
+                saveData({
+                    ...data,
+                    dailyReflections: { ...data.dailyReflections, [today]: reflection },
+                });
+            }
+
+            // Render views
+            if (view === 'daily') {
+                const dailyReflection = data.dailyReflections[today] || {
+                    morning: '',
+                    evening: '',
+                    energyLevel: 'medium',
+                    focusScore: 5,
+                };
+
+                const todaysTasks = data.tasks.filter(t => t.dueDate === today);
+                const overdueTasks = data.tasks.filter(t => !t.completed && new Date(t.dueDate) < new Date(today));
+
+                return (
+                    <div>
+                        <h1>Daily Tracker</h1>
+                        
+                        {overdueTasks.length > 0 && (
+                            <div className="danger-box">
+                                <strong>⚠ {overdueTasks.length} overdue task(s)</strong>
+                            </div>
+                        )}
+
+                        <div className="card">
+                            <h2>Morning Standup (2 min)</h2>
+                            <label>What are your 3 top priorities?</label>
+                            <textarea
+                                placeholder="1. ...\n2. ...\n3. ..."
+                                value={dailyReflection.morning}
+                                onChange={(e) => saveDailyReflection({ ...dailyReflection, morning: e.target.value })}
+                                rows="4"
+                            />
+                        </div>
+
+                        <div className="stats-grid">
+                            <div className="stat-card">
+                                <div className="stat-number">{todaysTasks.length}</div>
+                                <div className="stat-label">Today's tasks</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-number">{Math.round((data.timeBlocks[today]?.reduce((s, b) => s + b.duration, 0) || 0) / 60)}</div>
+                                <div className="stat-label">Hours blocked</div>
+                            </div>
+                        </div>
+
+                        <div className="card">
+                            <h2>Add Time Block</h2>
+                            <div className="grid-3">
+                                {data.categories.map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => addTimeBlock(today, cat.id)}
+                                        style={{ background: cat.color, color: 'white', fontWeight: 500 }}
+                                    >
+                                        + {cat.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {data.timeBlocks[today]?.map(block => {
+                            const cat = data.categories.find(c => c.id === block.categoryId);
+                            return (
+                                <div
+                                    key={block.id}
+                                    className="time-block"
+                                    style={{ background: cat.color }}
+                                >
+                                    <div>
+                                        <strong>{block.startTime}</strong> • {block.title || cat.name} ({block.duration}min)
+                                    </div>
+                                    <button onClick={() => removeTimeBlock(today, block.id)}>×</button>
+                                </div>
+                            );
+                        })}
+
+                        <div className="card">
+                            <h2>Today's Tasks</h2>
+                            {todaysTasks.map(task => (
+                                <div key={task.id} style={{ display: 'flex', gap: '8px', marginBottom: '8px', padding: '8px', background: 'var(--color-background-secondary)', borderRadius: '6px' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={task.completed}
+                                        onChange={(e) => updateTask(task.id, { completed: e.target.checked })}
+                                    />
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
+                                            {task.title}
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
+                                            {task.category}
+                                        </div>
+                                    </div>
+                                    <button onClick={() => removeTask(task.id)} style={{ background: 'transparent', color: 'var(--color-text-secondary)' }}>
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                            <button
+                                onClick={addTask}
+                                style={{
+                                    background: 'transparent',
+                                    border: '0.5px dashed var(--color-border-secondary)',
+                                    color: 'var(--color-text-secondary)',
+                                    width: '100%',
+                                    marginTop: '8px',
+                                }}
+                            >
+                                + Add task
+                            </button>
+                        </div>
+
+                        <div className="card">
+                            <h2>Evening Reflection (5 min)</h2>
+                            <label>Energy Level</label>
+                            <select
+                                value={dailyReflection.energyLevel}
+                                onChange={(e) => saveDailyReflection({ ...dailyReflection, energyLevel: e.target.value })}
+                                style={{ width: '100%', marginBottom: '12px' }}
+                            >
+                                <option value="very-low">Very Low</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="very-high">Very High</option>
+                            </select>
+
+                            <label>Focus Score (1-10)</label>
+                            <input
+                                type="number"
+                                min="1"
+                                max="10"
+                                value={dailyReflection.focusScore}
+                                onChange={(e) => saveDailyReflection({ ...dailyReflection, focusScore: parseInt(e.target.value) })}
+                                style={{ width: '100%', marginBottom: '12px' }}
+                            />
+
+                            <label>Evening Notes</label>
+                            <textarea
+                                placeholder="What went well? What to improve?"
+                                value={dailyReflection.evening}
+                                onChange={(e) => saveDailyReflection({ ...dailyReflection, evening: e.target.value })}
+                                rows="3"
+                            />
+                        </div>
+
+                        <div className="nav-buttons">
+                            <button onClick={() => setView('planner')} style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-primary)' }}>
+                                📅 Weekly Planner →
+                            </button>
+                            <button onClick={exportJSON} style={{ background: 'var(--color-background-info)', color: 'var(--color-text-info)' }}>
+                                📥 Export Data
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (view === 'planner') {
+                const weekStart = data.currentWeek;
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const daysData = days.map((day, idx) => {
+                    const date = new Date(weekStart);
+                    date.setDate(date.getDate() + idx);
+                    const dateStr = date.toISOString().split('T')[0];
+                    return { day, date: dateStr, blocks: data.timeBlocks[dateStr] || [] };
+                });
+
+                const allocation = {};
+                data.categories.forEach(cat => { allocation[cat.id] = 0; });
+                Object.values(data.timeBlocks).forEach(dayBlocks => {
+                    if (Array.isArray(dayBlocks)) {
+                        dayBlocks.forEach(block => {
+                            allocation[block.categoryId] = (allocation[block.categoryId] || 0) + block.duration;
+                        });
+                    }
+                });
+
+                return (
+                    <div>
+                        <h1>Weekly Planner</h1>
+                        
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', justifyContent: 'space-between' }}>
+                            <div>
+                                <button
+                                    onClick={() => {
+                                        const newWeek = new Date(weekStart);
+                                        newWeek.setDate(newWeek.getDate() - 7);
+                                        saveData({ ...data, currentWeek: newWeek.toISOString().split('T')[0] });
+                                    }}
+                                    style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-primary)', marginRight: '8px' }}
+                                >
+                                    ← Previous Week
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const newWeek = new Date(weekStart);
+                                        newWeek.setDate(newWeek.getDate() + 7);
+                                        saveData({ ...data, currentWeek: newWeek.toISOString().split('T')[0] });
+                                    }}
+                                    style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-primary)' }}
+                                >
+                                    Next Week →
+                                </button>
+                            </div>
+                            <button onClick={() => setView('daily')} style={{ background: 'var(--color-background-secondary)', color: 'var(--color-text-primary)' }}>
+                                ← Back to Daily
+                            </button>
+                        </div>
+
+                        <div className="week-grid">
+                            {daysData.map((dayData, idx) => (
+                                <div key={idx} className="card" style={{ padding: '12px' }}>
+                                    <h3>{dayData.day} {dayData.date.split('-')[2]}</h3>
+                                    {dayData.blocks.map(block => {
+                                        const cat = data.categories.find(c => c.id === block.categoryId);
+                                        return (
+                                            <div
+                                                key={block.id}
+                                                className="time-block"
+                                                style={{ background: cat.color, fontSize: '11px', padding: '6px' }}
+                                            >
+                                                <strong>{block.title || cat.name}</strong>
+                                                <br />
+                                                {block.startTime} • {block.duration}min
+                                                <button onClick={() => removeTimeBlock(dayData.date, block.id)}>×</button>
+                                            </div>
+                                        );
+                                    })}
+                                    <button
+                                        onClick={() => setSelectedDay(dayData)}
+                                        style={{
+                                            width: '100%',
+                                            background: 'transparent',
+                                            border: '0.5px dashed var(--color-border-secondary)',
+                                            color: 'var(--color-text-secondary)',
+                                            marginTop: '8px',
+                                        }}
+                                    >
+                                        + Add block
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        {selectedDay && (
+                            <div className="card" style={{ marginTop: '16px' }}>
+                                <h2>Add Block: {selectedDay.day}</h2>
+                                <div className="grid-3">
+                                    {data.categories.map(cat => (
+                                        <button
+                                            key={cat.id}
+                                            onClick={() => {
+                                                addTimeBlock(selectedDay.date, cat.id);
+                                                setSelectedDay(null);
+                                            }}
+                                            style={{ background: cat.color, color: 'white', fontWeight: 500 }}
+                                        >
+                                            {cat.name}
+                                        </button>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={() => setSelectedDay(null)}
+                                    style={{ marginTop: '12px', background: 'var(--color-background-secondary)', width: '100%' }}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="card" style={{ marginTop: '16px' }}>
+                            <h2>Time Allocation</h2>
+                            {data.categories.filter(c => allocation[c.id] > 0).sort((a, b) => (allocation[b.id] || 0) - (allocation[a.id] || 0)).map(cat => {
+                                const total = Object.values(allocation).reduce((a, b) => a + b, 0);
+                                const pct = total > 0 ? Math.round(allocation[cat.id] / total * 100) : 0;
+                                return (
+                                    <div key={cat.id} style={{ marginBottom: '12px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
+                                            <span>{cat.name}</span>
+                                            <span>{Math.round(allocation[cat.id])}min ({pct}%)</span>
+                                        </div>
+                                        <div className="progress-bar">
+                                            <div className="progress-fill" style={{ width: `${pct}%`, background: cat.color }} />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            }
+
+            return null;
+        };
+
+        ReactDOM.render(<TimeTracker />, document.getElementById('root'));
+    </script>
+</body>
+</html>
