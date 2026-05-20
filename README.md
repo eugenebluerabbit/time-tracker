@@ -2,7 +2,7 @@
 
    Personal time tracker with daily planning, task management, and analytics.
 
-   **Live tracker:** https://YOUR-USERNAME.github.io/time-tracker
+   **Live tracker:** https://eugene.github.io/time-tracker
 
    Features:
    - Daily standup & reflections
